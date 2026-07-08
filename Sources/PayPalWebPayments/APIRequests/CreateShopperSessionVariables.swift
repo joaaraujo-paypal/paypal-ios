@@ -3,27 +3,39 @@ import Foundation
 struct CreateShopperSessionVariables: Encodable {
 
     // MARK: - Required
+    let appSwitchEligibilityInput: AppSwitchEligibilityInput
+    let shopperSessionInput: ShopperSessionInput
+}
 
-    let osType: String
-    let token: String
-    let tokenType: String
-    let contextId: String
-    let returnAppUrl: String
-    let cancelAppUrl: String
+struct AppSwitchEligibilityInput: Encodable {
 
     // MARK: - Optional — derived internally
+    let contextId: String
+    let tokenType: String
+    let osType: String
+    let merchantOptInForAppSwitch: Bool
+    let paypalNativeAppInstalled: Bool
+    let experimentationContext: ExperimentationContext
 
-    let osVersion: String?
-    let fallbackUrlScheme: String?
     let buyerEmailAddressMerchantPassed: String?
-    let paypalNativeAppInstalled: Bool?
-    let bnCode: String?
-    let integrationChannel: String?
-    let sdkVersion: String?
+}
+struct ExperimentationContext: Encodable {
+
+    let appSwitchSupported: Bool
+    let merchantCountry: String
+    let integrationChannel: String
+    let isWebLLSEligible: Bool
+    let isWebView: Bool
+    let paymentType: String
+    let buyerGUID: String?
+    let merchantAccountId: String?
+}
 
     // MARK: - Optional — not currently wired
+struct ShopperSessionInput: Encodable {
 
-    let paymentMethodSelected: String?
-    let productCode: String?
-    let paymentType: String?
+    let returnAppUrl: String
+    let cancelAppUrl: String
+    let sdkVersion: String
+    let fallbackUrlScheme: String?
 }

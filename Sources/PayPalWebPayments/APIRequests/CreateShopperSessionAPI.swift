@@ -18,58 +18,24 @@ public class CreateShopperSessionAPI {
     private let networkingClient: NetworkingClient
 
     private let createShopperSessionQuery = """
-        mutation CreateShopperSessionWithAppSwitchEligibility(
-            $osType: OSType!
-            $osVersion: String
-            $token: Token!
-            $tokenType: TokenType!
-            $contextId: String!
-            $buyerEmailAddressMerchantPassed: EmailAddress
-            $paypalNativeAppInstalled: Boolean
-            $bnCode: String
-            $integrationChannel: AppSwitchIntegrationChannel
-            $paymentMethodSelected: PaymentMethodSelected
-            $productCode: AppSwitchProductCode
-            $paymentType: PaymentType
-            $returnAppUrl: String
-            $cancelAppUrl: String
-            $fallbackUrlScheme: String
-            $sdkVersion: String
+        mutation createShopperSessionWithAppSwitchEligibility(
+            $appSwitchEligibilityInput: externalAppSwitchEligibilityInput
+            $shopperSessionInput: externalShopperSessionInput
         ) {
-            createShopperSessionWithAppSwitchEligibility(
-                appSwitchEligibilityInput: {
-                    osType: $osType
-                    osVersion: $osVersion
-                    token: $token
-                    tokenType: $tokenType
-                    contextId: $contextId
-                    buyerEmailAddressMerchantPassed: $buyerEmailAddressMerchantPassed
-                    paypalNativeAppInstalled: $paypalNativeAppInstalled
-                    merchantOptInForAppSwitch: true
-                    experimentationContext: {
-                        bnCode: $bnCode
-                        merchantCountry: "US"
-                        integrationChannel: $integrationChannel
-                        paymentMethodSelected: $paymentMethodSelected
-                        productCode: $productCode
-                        paymentType: $paymentType
+            external {
+                createShopperSessionWithAppSwitchEligibility(
+                    appSwitchEligibilityInput: $appSwitchEligibilityInput
+                    shopperSessionInput: $shopperSessionInput
+                ) {
+                    appSwitchEligibilityResponse {
+                        appSwitchEligible
+                        ineligibleReason
+                        redirectURL
                     }
-                }
-                shopperSessionInput: {
-                    returnAppUrl: $returnAppUrl
-                    cancelAppUrl: $cancelAppUrl
-                    fallbackUrlScheme: $fallbackUrlScheme
-                    sdkVersion: $sdkVersion
-                }
-            ) {
-                appSwitchEligibilityResponse {
-                    appSwitchEligible
-                    ineligibleReason
-                    redirectURL
-                }
-                shopperSessionResponse {
-                    sessionId
-                    expiresAt
+                    shopperSessionResponse {
+                        sessionId
+                        expiresAt
+                    }
                 }
             }
         }
@@ -107,29 +73,37 @@ public class CreateShopperSessionAPI {
         userIdentity: PayPalUserIdentity?
     ) async throws -> ShopperSessionResult {
 
-        #if canImport(UIKit)
-        let osVersion: String? = UIDevice.current.systemVersion
-        #else
-        let osVersion: String? = nil
-        #endif
+        let experimentationContext = ExperimentationContext(
+            appSwitchSupported: true,
+            merchantCountry: "US",
+            integrationChannel: PayPalCoreConstants.integrationChannel,
+            isWebLLSEligible: false,
+            isWebView: false,
+            paymentType: "PAY",
+            buyerGUID: nil,
+            merchantAccountId: coreConfig.merchantID.isEmpty ? nil : coreConfig.merchantID
+        )
 
-        let variables = CreateShopperSessionVariables(
-            osType: PayPalCoreConstants.osType,
-            token: token,
-            tokenType: tokenType,
+        let appSwitchEligibilityInput = AppSwitchEligibilityInput(
             contextId: contextId,
+            tokenType: tokenType,
+            osType: PayPalCoreConstants.osType,
+            merchantOptInForAppSwitch: true,
+            paypalNativeAppInstalled: true,
+            experimentationContext: experimentationContext,
+            buyerEmailAddressMerchantPassed: userIdentity?.email
+        )
+
+        let shopperSessionInput = ShopperSessionInput(
             returnAppUrl: urlConfig.returnAppURL.absoluteString,
             cancelAppUrl: urlConfig.cancelAppURL.absoluteString,
-            osVersion: osVersion,
-            fallbackUrlScheme: urlConfig.fallbackSchemeURL?.absoluteString,
-            buyerEmailAddressMerchantPassed: userIdentity?.email,
-            paypalNativeAppInstalled: nil,
-            bnCode: coreConfig.bnCode,
-            integrationChannel: PayPalCoreConstants.integrationChannel,
             sdkVersion: PayPalCoreConstants.payPalSDKVersion,
-            paymentMethodSelected: nil,
-            productCode: nil,
-            paymentType: nil
+            fallbackUrlScheme: urlConfig.fallbackSchemeURL?.absoluteString
+        )
+
+        let variables = CreateShopperSessionVariables(
+            appSwitchEligibilityInput: appSwitchEligibilityInput,
+            shopperSessionInput: shopperSessionInput
         )
 
         let graphQLRequest = GraphQLRequest(

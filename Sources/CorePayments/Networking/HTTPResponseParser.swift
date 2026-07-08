@@ -31,11 +31,23 @@ public class HTTPResponseParser {
             throw NetworkingError.noResponseDataError
         }
         
+        if let message = graphQLErrorsMessage(from: data) {
+            throw NetworkingError.serverResponseError(message)
+        }
+
         if httpResponse.isSuccessful {
             return try parseSuccessResult(data, as: T.self, isGraphQL: true)
         } else {
             return try parseErrorResult(data, as: T.self, isGraphQL: true)
         }
+    }
+    private func graphQLErrorsMessage(from data: Data) -> String? {
+        guard let response = try? decoder.decode(GraphQLPartialErrorResponse.self, from: data),
+            let errors = response.errors, !errors.isEmpty else {
+            return nil
+        }
+        let message = errors.compactMap { $0.message }.joined(separator: "; ")
+        return message.isEmpty ? "GraphQL request returned errors." : message
     }
     
     // MARK: - Private Methods

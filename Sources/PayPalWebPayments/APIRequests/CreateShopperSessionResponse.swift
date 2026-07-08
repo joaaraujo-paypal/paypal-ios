@@ -2,10 +2,19 @@ import Foundation
 
 struct CreateShopperSessionResponse: Decodable {
 
-    let shopperSession: ShopperSessionResult?
+    let external: ExternalContainer?
 
-    enum CodingKeys: String, CodingKey {
-        case shopperSession = "createShopperSessionWithAppSwitchEligibility"
+    var shopperSession: ShopperSessionResult? {
+        external?.shopperSession
+    }
+
+    struct ExternalContainer: Decodable {
+
+        let shopperSession: ShopperSessionResult?
+
+        enum CodingKeys: String, CodingKey {
+            case shopperSession = "createShopperSessionWithAppSwitchEligibility"
+        }
     }
 }
 

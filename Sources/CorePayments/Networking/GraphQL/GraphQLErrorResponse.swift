@@ -11,3 +11,13 @@ struct GraphQLErrorResponse: Decodable {
     let error: String
     let correlationID: String?
 }
+
+/// Parses the standard GraphQL top-level `errors` array (present even on HTTP 200 partial errors).
+struct GraphQLPartialErrorResponse: Decodable {
+
+    struct GraphQLError: Decodable {
+        let message: String?
+    }
+
+    let errors: [GraphQLError]?
+}
