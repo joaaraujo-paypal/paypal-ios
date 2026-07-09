@@ -31,7 +31,11 @@ struct ShopperSessionResult: Decodable {
     }
 
     var redirectURL: String? {
-        appSwitchEligibilityResponse?.redirectURL
+        appSwitchEligibilityResponse?.checkoutUrls?.redirectURL
+    }
+
+    var checkoutFallbackURL: String? {
+        appSwitchEligibilityResponse?.checkoutUrls?.checkoutFallbackUrl
     }
 
     var ineligibleReason: String? {
@@ -47,17 +51,23 @@ struct AppSwitchEligibilityResponse: Decodable {
 
     let appSwitchEligible: Bool
     let ineligibleReason: String?
+    let checkoutUrls: CheckoutUrls?
+}
+
+struct CheckoutUrls: Decodable {
+
     let redirectURL: String?
+    let checkoutFallbackUrl: String?
 }
 
 struct ShopperSessionResponse: Decodable {
 
     let sessionId: String
-    let expiresAt: String
+    let expiresAt: String?
 }
 
 struct ShopperSessionConfig {
 
     let id: String
-    let expiresAt: String
+    let expiresAt: String?
 }

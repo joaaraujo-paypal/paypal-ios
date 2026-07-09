@@ -33,7 +33,7 @@ class PayPalWebCheckoutClient_CreateSession_Tests: XCTestCase {
             appSwitchEligibilityResponse: AppSwitchEligibilityResponse(
                 appSwitchEligible: false,
                 ineligibleReason: "TEST_INELIGIBLE",
-                redirectURL: nil
+                checkoutUrls: nil
             ),
             shopperSessionResponse: ShopperSessionResponse(
                 sessionId: id,
@@ -51,7 +51,7 @@ class PayPalWebCheckoutClient_CreateSession_Tests: XCTestCase {
             appSwitchEligibilityResponse: AppSwitchEligibilityResponse(
                 appSwitchEligible: true,
                 ineligibleReason: nil,
-                redirectURL: redirectURL
+                checkoutUrls: CheckoutUrls(redirectURL: redirectURL, checkoutFallbackUrl: nil)
             ),
             shopperSessionResponse: ShopperSessionResponse(
                 sessionId: id,

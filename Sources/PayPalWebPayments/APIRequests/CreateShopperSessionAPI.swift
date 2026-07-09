@@ -18,7 +18,7 @@ public class CreateShopperSessionAPI {
     private let networkingClient: NetworkingClient
 
     private let createShopperSessionQuery = """
-        mutation createShopperSessionWithAppSwitchEligibility(
+        mutation CreateShopperSessionWithAppSwitchEligibility(
             $appSwitchEligibilityInput: externalAppSwitchEligibilityInput
             $shopperSessionInput: externalShopperSessionInput
         ) {
@@ -30,7 +30,10 @@ public class CreateShopperSessionAPI {
                     appSwitchEligibilityResponse {
                         appSwitchEligible
                         ineligibleReason
-                        redirectURL
+                        checkoutUrls {
+                            redirectURL
+                            checkoutFallbackUrl
+                        }
                     }
                     shopperSessionResponse {
                         sessionId
