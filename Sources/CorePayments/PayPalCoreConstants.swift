@@ -22,3 +22,10 @@ public enum ExternalTokenKind {
     public static let orderId = "ORDER_ID"
     public static let clientToken = "CLIENT_TOKEN"
 }
+
+/// The type of token supplied to the Shopper Session mutation.
+public enum TokenType {
+    public static let orderID = "CHECKOUT_TOKEN"
+    public static let vaultID = "BILLING_TOKEN"
+    public static let billingToken = "BILLING_TOKEN"
+}
