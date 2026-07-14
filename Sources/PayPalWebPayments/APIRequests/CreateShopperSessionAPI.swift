@@ -109,13 +109,20 @@ public class CreateShopperSessionAPI {
             shopperSessionInput: shopperSessionInput
         )
 
+        let operationName = "CreateShopperSessionWithAppSwitchEligibility"
+
         let graphQLRequest = GraphQLRequest(
             query: createShopperSessionQuery,
             variables: variables,
-            queryNameForURL: nil
+            queryNameForURL: nil,
+            operationName: operationName
         )
 
+        logRequest(query: createShopperSessionQuery, variables: variables, operationName: operationName)
+
         let httpResponse = try await networkingClient.fetch(request: graphQLRequest)
+
+        logResponse(httpResponse)
 
         let parsed: CreateShopperSessionResponse = try HTTPResponseParser()
             .parseGraphQL(httpResponse, as: CreateShopperSessionResponse.self)
@@ -125,5 +132,44 @@ public class CreateShopperSessionAPI {
         }
 
         return result
+    }
+
+    // MARK: - Private Logging Helpers
+
+    private func logRequest(query: String, variables: CreateShopperSessionVariables, operationName: String?) {
+        #if DEBUG
+        var variablesString = "<unavailable>"
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = .prettyPrinted
+        if let data = try? encoder.encode(variables), let string = String(data: data, encoding: .utf8) {
+            variablesString = string
+        }
+
+        print(
+            """
+            [CreateShopperSessionAPI] Request ->
+            Query: \(query)
+            Variables: \(variablesString)
+            operationName: \(operationName ?? "<none>")
+            """
+        )
+        #endif
+    }
+
+    private func logResponse(_ httpResponse: HTTPResponse) {
+        #if DEBUG
+        var bodyString = "<empty>"
+        if let body = httpResponse.body, let string = String(data: body, encoding: .utf8) {
+            bodyString = string
+        }
+
+        print(
+            """
+            [CreateShopperSessionAPI] Response <-
+            Status: \(httpResponse.status)
+            Body: \(bodyString)
+            """
+        )
+        #endif
     }
 }
